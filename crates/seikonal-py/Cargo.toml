@@ -1,0 +1,10 @@
+[package]
+name = "seikonal-py"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Python bindings for seikonal"
+
+[dependencies]
+seikonal-core = { path = "../seikonal-core" }

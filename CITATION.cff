@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "seikonal: Fast Marching Method Eikonal Solver in Rust"
+authors:
+  - family-names: "Pageot"
+    given-names: "D."
+version: 0.1.0
+date-released: 2026-10-08
+license: MIT
+repository-code: "https://github.com/pageotd/seikonal"

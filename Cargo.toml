@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "crates/seikonal-core",
+    "crates/seikonal-py",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["pageotd"]
+license = "MIT"
+repository = "https://github.com/pageotd/seikonal"
+readme = "README.md"
+
+[workspace.dependencies]
+# Dépendances partagées ou futures (vide ou minimal pour le bloc 0)

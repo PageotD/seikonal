@@ -1,0 +1,78 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Liste les tâches disponibles
+    cmds:
+      - task --list
+
+  fmt:
+    desc: Formate le code Rust
+    cmds:
+      - cargo fmt --all
+
+  lint:fmt:
+    desc: Vérifie le formatage du code Rust sans le modifier
+    cmds:
+      - cargo fmt --all -- --check
+
+  lint:clippy:
+    desc: Exécute le linter Clippy sur tout le workspace
+    cmds:
+      - cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  lint:
+    desc: Lance toutes les vérifications de style/linting
+    cmds:
+      - task: lint:fmt
+      - task: lint:clippy
+
+  test:unit:
+    desc: Exécute les tests unitaires
+    cmds:
+      - cargo test --workspace --lib
+
+  test:integration:
+    desc: Exécute les tests d'intégration
+    cmds:
+      - cargo test --workspace --test '*'
+
+  test:doc:
+    desc: Exécute les tests inclus dans la documentation
+    cmds:
+      - cargo test --workspace --doc
+
+  test:
+    desc: Lance l'ensemble de la suite de tests
+    cmds:
+      - task: test:unit
+      - task: test:integration
+      - task: test:doc
+
+  audit:deny:
+    desc: Vérifie les licences, advisories et dépendances via cargo-deny
+    cmds:
+      - cargo deny check
+
+  audit:advisories:
+    desc: Vérifie les failles de sécurité connues via cargo-audit
+    cmds:
+      - cargo audit
+
+  audit:
+    desc: Exécute les vérifications d'audit et de sécurité
+    cmds:
+      - task: audit:deny
+      - task: audit:advisories
+
+  check:
+    desc: Vérifie que tout le workspace compile
+    cmds:
+      - cargo check --workspace --all-targets
+
+  ci:
+    desc: Point d'entrée unique de la CI (vérifie tout ce que la CI valide)
+    cmds:
+      - task: lint
+      - task: test
+      - task: audit
