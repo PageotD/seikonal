@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project skeleton with Cargo workspace (`seikonal-core`, `seikonal-py`).
 - Taskfile orchestration, devcontainer, and GitHub Actions CI workflow.
+- Implement 2D grid and local eikonal stencil
