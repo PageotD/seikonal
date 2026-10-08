@@ -4,4 +4,7 @@
 #![warn(missing_docs)]
 
 pub mod error;
+pub mod grid;
+
 pub use error::SeikonalError;
+pub use grid::Grid2D;
