@@ -1,7 +1,7 @@
 //! `seikonal-core` provides the core Fast Marching Method (FMM) eikonal solver algorithms.
 
 #![deny(unsafe_code)]
-#![warn(missing_docs)] 
+#![warn(missing_docs)]
 
 /// Adds two integers (temporary placeholder for Block 0 validation).
 pub fn add(left: u64, right: u64) -> u64 {
