@@ -1,8 +1,9 @@
-//! Integration test placeholder for seikonal-core.
+//! Integration tests for `seikonal-core`.
 
-use seikonal_core::add;
+use seikonal_core::SeikonalError;
 
 #[test]
-fn test_core_integration_placeholder() {
-    assert_eq!(add(10, 20), 30);
+fn test_integration_error_handling() {
+    let err = SeikonalError::InvalidDimensions { nx: 0, nz: 10 };
+    assert!(err.to_string().contains("Invalid grid dimensions"));
 }
