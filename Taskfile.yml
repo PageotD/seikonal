@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   default:
@@ -42,12 +42,24 @@ tasks:
     cmds:
       - cargo test --workspace --doc
 
+  python:dev:
+    desc: Compile et installe le package Python en mode développement via maturin
+    cmds:
+      - maturin develop
+
+  python:test:
+    desc: Exécute la suite de tests Python pytest
+    deps: [python:dev]
+    cmds:
+      - pytest python/tests/
+
   test:
-    desc: Lance l'ensemble de la suite de tests
+    desc: Lance l'ensemble de la suite de tests (Rust et Python)
     cmds:
       - task: test:unit
       - task: test:integration
       - task: test:doc
+      - task: python:test
 
   audit:deny:
     desc: Vérifie les licences, advisories et dépendances via cargo-deny
