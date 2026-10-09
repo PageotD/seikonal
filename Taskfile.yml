@@ -45,7 +45,7 @@ tasks:
   python:dev:
     desc: Compile et installe le package Python en mode développement via maturin
     cmds:
-      - maturin develop
+      - pip install -e .
 
   python:test:
     desc: Exécute la suite de tests Python pytest
