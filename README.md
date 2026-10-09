@@ -22,3 +22,8 @@ task lint       # Run format check and clippy
 task test       # Run test suite
 task audit      # Run cargo-deny and cargo-audit
 task ci         # Run all local CI checks
+```
+
+## Note
+
+AI were used to help me in the development of the tests and the review of the code.
