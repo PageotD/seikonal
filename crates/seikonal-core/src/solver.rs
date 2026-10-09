@@ -72,17 +72,50 @@ impl FMMSolver2D {
         xs: f64,
         zs: f64,
     ) -> Result<(), SeikonalError> {
-        let ix_s = (((xs - grid.x0) / grid.dx).round() as isize).max(0) as usize;
-        let iz_s = (((zs - grid.z0) / grid.dz).round() as isize).max(0) as usize;
-        let ix_s = ix_s.min(grid.nx - 1);
-        let iz_s = iz_s.min(grid.nz - 1);
-        let idx_s = grid.linear_index(ix_s, iz_s)?;
-        let (x_node, z_node) = grid.node_coords(ix_s, iz_s)?;
-        let dist = ((x_node - xs).powi(2) + (z_node - zs).powi(2)).sqrt();
-        let v0 = grid.velocities[idx_s];
-        let t0 = dist / v0;
-        grid.traveltimes[idx_s] = t0;
-        nb.push(idx_s, t0);
+        let ix_center = (((xs - grid.x0) / grid.dx).round() as isize).max(0) as usize;
+        let iz_center = (((zs - grid.z0) / grid.dz).round() as isize).max(0) as usize;
+        let ix_center = ix_center.min(grid.nx - 1);
+        let iz_center = iz_center.min(grid.nz - 1);
+        // 1. Freeze the 3x3 box around source as Alive with exact analytical traveltimes
+        let ix_min = ix_center.saturating_sub(1);
+        let ix_max = (ix_center + 1).min(grid.nx - 1);
+        let iz_min = iz_center.saturating_sub(1);
+        let iz_max = (iz_center + 1).min(grid.nz - 1);
+        for ix in ix_min..=ix_max {
+            for iz in iz_min..=iz_max {
+                let idx = grid.linear_index(ix, iz)?;
+                let (x, z) = grid.node_coords(ix, iz)?;
+                let dist = ((x - xs).powi(2) + (z - zs).powi(2)).sqrt();
+                let v = grid.velocities[idx];
+                let t_exact = dist / v;
+                grid.traveltimes[idx] = t_exact;
+                nb.set_state(idx, NodeState::Alive);
+            }
+        }
+        // 2. Compute candidate traveltime for all non-Alive neighbors touching the 3x3 box and push to NarrowBand
+        for ix in ix_min..=ix_max {
+            for iz in iz_min..=iz_max {
+                let neighbors = [
+                    (ix.wrapping_sub(1), iz, ix > 0),
+                    (ix + 1, iz, ix + 1 < grid.nx),
+                    (ix, iz.wrapping_sub(1), iz > 0),
+                    (ix, iz + 1, iz + 1 < grid.nz),
+                ];
+                for &(n_ix, n_iz, is_valid) in &neighbors {
+                    if !is_valid {
+                        continue;
+                    }
+                    let n_idx = grid.linear_index(n_ix, n_iz)?;
+                    if nb.state(n_idx) == NodeState::Far {
+                        let t_cand = Self::compute_node_traveltime(grid, nb, n_ix, n_iz)?;
+                        if t_cand < grid.traveltimes[n_idx] {
+                            grid.traveltimes[n_idx] = t_cand;
+                            nb.push(n_idx, t_cand);
+                        }
+                    }
+                }
+            }
+        }
         Ok(())
     }
 
