@@ -96,3 +96,71 @@ fn test_fmm_solver_2d_homogeneous_full_grid_accuracy() {
         "Mean relative error too high: {mean_rel_error}"
     );
 }
+
+#[test]
+fn test_fmm_solver_2d_two_layer_refraction() {
+    let nx = 101; // 1000 m width
+    let nz = 51;  // 500 m depth
+    let dx = 10.0;
+    let dz = 10.0;
+    let x0 = 0.0;
+    let z0 = 0.0;
+
+    let v1 = 1500.0; // 1500 m/s in top layer (water/sediments)
+    let v2 = 3000.0; // 3000 m/s in bottom layer (bedrock)
+    let z_interface = 150.0; // interface at 150 m depth
+
+    // Build two-layer velocity model
+    let mut velocities = Vec::with_capacity(nx * nz);
+    for _ix in 0..nx {
+        for iz in 0..nz {
+            let z = (iz as f64) * dz;
+            if z < z_interface {
+                velocities.push(v1);
+            } else {
+                velocities.push(v2);
+            }
+        }
+    }
+
+    let mut grid = Grid2D::new(nx, nz, dx, dz, x0, z0, velocities).unwrap();
+
+    // Source placed at the top-left surface (0, 0)
+    FMMSolver2D::solve(&mut grid, 0.0, 0.0).unwrap();
+
+    // 1. Check monotonicity: traveltimes must strictly increase away from source
+    for ix in 0..nx {
+        for iz in 0..nz {
+            let idx = grid.linear_index(ix, iz).unwrap();
+            let t = grid.traveltimes[idx];
+            assert!(t.is_finite());
+            if ix > 0 {
+                let prev_idx = grid.linear_index(ix - 1, iz).unwrap();
+                assert!(t > grid.traveltimes[prev_idx]);
+            }
+        }
+    }
+
+    // 2. Far offset on surface (z = 0, x = 900 m):
+    // Compare computed traveltime with theoretical head-wave arrival time
+    let x_far = 900.0;
+    let ix_far = (x_far / dx) as usize;
+    let idx_surface_far = grid.linear_index(ix_far, 0).unwrap();
+    let t_calc_far = grid.traveltimes[idx_surface_far];
+
+    // Theoretical head-wave arrival time: T = x/v2 + 2*h*sqrt(v2^2 - v1^2)/(v1*v2)
+    let t_head_exact = (x_far / v2) + 2.0 * z_interface * (v2 * v2 - v1 * v1).sqrt() / (v1 * v2);
+    // Direct wave arrival time: x / v1 = 900 / 1500 = 0.60 s
+    let t_direct = x_far / v1;
+
+    // The head-wave must arrive significantly before the direct wave
+    assert!(t_head_exact < t_direct);
+    assert!(t_calc_far < t_direct);
+
+    // Relative error on head-wave traveltime should be within ~3%
+    let rel_err = (t_calc_far - t_head_exact).abs() / t_head_exact;
+    assert!(
+        rel_err < 0.05,
+        "Head-wave error too high: t_calc={t_calc_far}, t_exact={t_head_exact}, rel_err={rel_err}"
+    );
+}
