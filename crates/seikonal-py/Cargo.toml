@@ -6,5 +6,11 @@ rust-version.workspace = true
 license.workspace = true
 description = "Python bindings for seikonal"
 
+[lib]
+name = "seikonal"
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 seikonal-core = { path = "../seikonal-core" }
+pyo3 = { version = "0.24", features = ["extension-module"] }
+numpy = "0.24"
