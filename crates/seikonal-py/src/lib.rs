@@ -55,7 +55,12 @@ fn solve_2d<'py>(
     let nx = shape[0];
     let nz = shape[1];
 
-    // Ensure C-contiguous flat slice
+    if !velocities.is_c_contiguous() {
+        return Err(PyValueError::new_err(
+            "velocities array must be C-contiguous (C-order)",
+        ));
+    }
+
     let vel_slice = velocities
         .as_slice()
         .map_err(|_| PyValueError::new_err("velocities array must be C-contiguous float64"))?;
