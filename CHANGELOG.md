@@ -13,6 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project skeleton with Cargo workspace (`seikonal-core`, `seikonal-py`).
-- Taskfile orchestration, devcontainer, and GitHub Actions CI workflow.
-- Implement 2D grid and local eikonal stencil
+- 2D grid representation (`Grid2D`) with depth-positive convention and C-order indexing.
+- 2D local upwind Eikonal stencil (`solve_eikonal_2d`).
+- Narrow band priority queue (`NarrowBand`) and node state tracking (`NodeState`) with lazy deletion.
