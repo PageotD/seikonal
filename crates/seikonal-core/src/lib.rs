@@ -10,5 +10,5 @@ pub mod stencil;
 
 pub use error::SeikonalError;
 pub use grid::Grid2D;
-pub use narrowband::{NodeState, OrderedNode};
+pub use narrowband::{NarrowBand, NodeState, OrderedNode};
 pub use stencil::solve_eikonal_2d;
