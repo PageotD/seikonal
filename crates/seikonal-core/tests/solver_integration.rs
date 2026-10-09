@@ -1,9 +1,9 @@
 //! Integration tests for `seikonal-core`.
 //! Integration tests for `seikonal-core` - Block 1 (Grid & Stencil in homogeneous medium).
 
+use seikonal_core::FMMSolver2D;
 use seikonal_core::SeikonalError;
-use seikonal_core::{Grid2D, solve_eikonal_2d};
-use seikonal_core::{FMMSolver2D}; //, Grid2D, SeikonalError};
+use seikonal_core::{Grid2D, solve_eikonal_2d}; //, Grid2D, SeikonalError};
 
 #[test]
 fn test_integration_error_handling() {
@@ -75,7 +75,10 @@ fn test_fmm_solver_2d_homogeneous_full_grid_accuracy() {
             let t_exact = dist / v0;
             let idx = grid.linear_index(ix, iz).unwrap();
             let t_calc = grid.traveltimes[idx];
-            assert!(t_calc.is_finite(), "Traveltime at ({ix}, {iz}) is not finite");
+            assert!(
+                t_calc.is_finite(),
+                "Traveltime at ({ix}, {iz}) is not finite"
+            );
             // Skip the source node itself and immediate 1-node radius (curvature singularity)
             if dist > 2.0 * dx {
                 let rel_error = (t_calc - t_exact).abs() / t_exact;
@@ -100,7 +103,7 @@ fn test_fmm_solver_2d_homogeneous_full_grid_accuracy() {
 #[test]
 fn test_fmm_solver_2d_two_layer_refraction() {
     let nx = 101; // 1000 m width
-    let nz = 51;  // 500 m depth
+    let nz = 51; // 500 m depth
     let dx = 10.0;
     let dz = 10.0;
     let x0 = 0.0;
