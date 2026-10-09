@@ -6,9 +6,11 @@
 pub mod error;
 pub mod grid;
 pub mod narrowband;
+pub mod solver;
 pub mod stencil;
 
 pub use error::SeikonalError;
 pub use grid::Grid2D;
 pub use narrowband::{NarrowBand, NodeState, OrderedNode};
+pub use solver::FMMSolver2D;
 pub use stencil::solve_eikonal_2d;
