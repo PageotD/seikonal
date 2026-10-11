@@ -3,6 +3,7 @@
 use numpy::{IntoPyArray, PyArray2, PyArrayMethods, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::{PyIndexError, PyValueError};
 use pyo3::prelude::*;
+pub use seikonal_core::stencil::{solve_eikonal_2d, solve_eikonal_2d_order};
 use seikonal_core::{FMMSolver2D, Grid2D, SeikonalError};
 
 /// Converts internal `SeikonalError` into an appropriate Python exception.
