@@ -166,7 +166,11 @@ impl FMMSolver2D {
         iz: usize,
         is_x_axis: bool,
     ) -> Result<(Option<f64>, Option<f64>), SeikonalError> {
-        let (pos, len) = if is_x_axis { (ix, grid.nx) } else { (iz, grid.nz) };
+        let (pos, len) = if is_x_axis {
+            (ix, grid.nx)
+        } else {
+            (iz, grid.nz)
+        };
 
         let t_neg = if pos > 0 {
             let n_idx = if is_x_axis {
@@ -231,10 +235,18 @@ impl FMMSolver2D {
     ) -> Result<Option<f64>, SeikonalError> {
         let (n2_ix, n2_iz, valid) = if is_x_axis {
             let target_ix = ix as isize + 2 * dir;
-            (target_ix.max(0) as usize, iz, target_ix >= 0 && (target_ix as usize) < grid.nx)
+            (
+                target_ix.max(0) as usize,
+                iz,
+                target_ix >= 0 && (target_ix as usize) < grid.nx,
+            )
         } else {
             let target_iz = iz as isize + 2 * dir;
-            (ix, target_iz.max(0) as usize, target_iz >= 0 && (target_iz as usize) < grid.nz)
+            (
+                ix,
+                target_iz.max(0) as usize,
+                target_iz >= 0 && (target_iz as usize) < grid.nz,
+            )
         };
 
         if valid {

@@ -138,16 +138,8 @@ mod tests {
         let err_ord1 = (t_ord1 - t_exact).abs() / t_exact;
 
         // Order 2 estimate
-        let t_ord2 = solve_eikonal_2d_order(
-            Some(tx1),
-            Some(tx2),
-            Some(tz1),
-            Some(tz2),
-            dx,
-            dz,
-            v,
-            2,
-        );
+        let t_ord2 =
+            solve_eikonal_2d_order(Some(tx1), Some(tx2), Some(tz1), Some(tz2), dx, dz, v, 2);
         let err_ord2 = (t_ord2 - t_exact).abs() / t_exact;
 
         // Order 2 must be significantly more accurate than Order 1 on curved circular wavefront
