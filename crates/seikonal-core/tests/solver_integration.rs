@@ -167,3 +167,52 @@ fn test_fmm_solver_2d_two_layer_refraction() {
         "Head-wave error too high: t_calc={t_calc_far}, t_exact={t_head_exact}, rel_err={rel_err}"
     );
 }
+
+#[test]
+fn test_order2_accuracy_improvement_over_order1() {
+    let nx = 51;
+    let nz = 51;
+    let dx = 10.0;
+    let dz = 10.0;
+    let v0 = 2000.0;
+    let (xs, zs) = (250.0, 250.0);
+
+    let mut grid_ord1 = Grid2D::new_homogeneous(nx, nz, dx, dz, 0.0, 0.0, v0).unwrap();
+    let mut grid_ord2 = Grid2D::new_homogeneous(nx, nz, dx, dz, 0.0, 0.0, v0).unwrap();
+
+    FMMSolver2D::solve_order(&mut grid_ord1, xs, zs, 1).unwrap();
+    FMMSolver2D::solve_order(&mut grid_ord2, xs, zs, 2).unwrap();
+
+    let mut sum_err_ord1 = 0.0;
+    let mut sum_err_ord2 = 0.0;
+    let mut count = 0;
+
+    for ix in 0..nx {
+        for iz in 0..nz {
+            let (x, z) = grid_ord1.node_coords(ix, iz).unwrap();
+            let dist = ((x - xs).powi(2) + (z - zs).powi(2)).sqrt();
+            if dist > 3.0 * dx {
+                let t_exact = dist / v0;
+                let idx = grid_ord1.linear_index(ix, iz).unwrap();
+
+                let err1 = (grid_ord1.traveltimes[idx] - t_exact).abs() / t_exact;
+                let err2 = (grid_ord2.traveltimes[idx] - t_exact).abs() / t_exact;
+
+                sum_err_ord1 += err1;
+                sum_err_ord2 += err2;
+                count += 1;
+            }
+        }
+    }
+
+    let mean_err1 = sum_err_ord1 / (count as f64);
+    let mean_err2 = sum_err_ord2 / (count as f64);
+
+    // Order 2 mean error must be significantly better than Order 1
+    assert!(
+        mean_err2 < mean_err1,
+        "Order 2 mean error ({mean_err2}) should be lower than Order 1 ({mean_err1})"
+    );
+    // Mean error with order 2 drops below 1% (typically ~0.5%)
+    assert!(mean_err2 < 0.01, "Order 2 mean error too high: {mean_err2}");
+}

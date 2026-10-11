@@ -82,3 +82,28 @@ def test_solve_2d_input_validation_errors():
     f_order_vel = np.asfortranarray(valid_vel)
     with pytest.raises(ValueError, match="must be C-contiguous"):
         seikonal.solve_2d(f_order_vel, dx=1.0, dz=1.0, xs=0.0, zs=0.0)
+
+def test_solve_2d_order2_accuracy():
+    """Verify that order 2 produces lower error than order 1."""
+    nx, nz = 51, 51
+    dx, dz = 10.0, 10.0
+    v0 = 2000.0
+    xs, zs = 250.0, 250.0
+
+    velocities = np.full((nx, nz), v0, dtype=np.float64)
+
+    tt_ord1 = seikonal.solve_2d(velocities, dx, dz, xs, zs, order=1)
+    tt_ord2 = seikonal.solve_2d(velocities, dx, dz, xs, zs, order=2)
+
+    x = np.arange(nx) * dx
+    z = np.arange(nz) * dz
+    X, Z = np.meshgrid(x, z, indexing="ij")
+    distances = np.sqrt((X - xs) ** 2 + (Z - zs) ** 2)
+    t_exact = distances / v0
+
+    mask = distances > 3.0 * dx
+    err1 = np.mean(np.abs(tt_ord1[mask] - t_exact[mask]) / t_exact[mask])
+    err2 = np.mean(np.abs(tt_ord2[mask] - t_exact[mask]) / t_exact[mask])
+
+    assert err2 < err1
+    assert err2 < 0.01  # less than 1% mean error

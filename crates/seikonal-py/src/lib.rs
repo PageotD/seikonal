@@ -3,6 +3,7 @@
 use numpy::{IntoPyArray, PyArray2, PyArrayMethods, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::{PyIndexError, PyValueError};
 use pyo3::prelude::*;
+pub use seikonal_core::stencil::{solve_eikonal_2d, solve_eikonal_2d_order};
 use seikonal_core::{FMMSolver2D, Grid2D, SeikonalError};
 
 /// Converts internal `SeikonalError` into an appropriate Python exception.
@@ -39,7 +40,7 @@ fn to_py_err(err: SeikonalError) -> PyErr {
 /// numpy.ndarray (2D, float64)
 ///     Computed traveltime field with shape (nx, nz).
 #[pyfunction]
-#[pyo3(signature = (velocities, dx, dz, xs, zs, x0 = 0.0, z0 = 0.0))]
+#[pyo3(signature = (velocities, dx, dz, xs, zs, x0 = 0.0, z0 = 0.0, order = 2))]
 #[allow(clippy::too_many_arguments)]
 fn solve_2d<'py>(
     py: Python<'py>,
@@ -50,7 +51,12 @@ fn solve_2d<'py>(
     zs: f64,
     x0: f64,
     z0: f64,
+    order: usize,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    if order != 1 && order != 2 {
+        return Err(PyValueError::new_err("order must be 1 or 2"));
+    }
+
     let shape = velocities.shape();
     let nx = shape[0];
     let nz = shape[1];
@@ -70,8 +76,8 @@ fn solve_2d<'py>(
     // Create Grid2D
     let mut grid = Grid2D::new(nx, nz, dx, dz, x0, z0, vel_vec).map_err(to_py_err)?;
 
-    // Solve FMM
-    FMMSolver2D::solve(&mut grid, xs, zs).map_err(to_py_err)?;
+    // Solve FMM with chosen order
+    FMMSolver2D::solve_order(&mut grid, xs, zs, order).map_err(to_py_err)?;
 
     // Convert traveltimes Vec<f64> back into a 2D NumPy array with shape (nx, nz)
     let tt_vec = grid.traveltimes;
