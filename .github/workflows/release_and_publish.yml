@@ -36,19 +36,29 @@ jobs:
       - name: Calculate version & generate changelog
         id: semver
         run: |
-          NEXT_VERSION=$(git cliff --bumped-version | sed 's/^v//')
+          RAW_VERSION=$(git cliff --bumped-version 2>/dev/null | sed 's/^v//')
 
-          if [ -z "$NEXT_VERSION" ]; then
-            echo "No version bump required based on recent commits."
-            echo "bump=false" >> $GITHUB_OUTPUT
-            exit 0
+          # If no previous tag or version calculation is < 0.2.0, enforce 0.2.0 as the base release
+          if [ -z "$RAW_VERSION" ]; then
+            NEXT_VERSION="0.2.0"
+          else
+            # Python semver comparison to ensure >= 0.2.0
+            NEXT_VERSION=$(python3 -c "
+import sys
+v = '$RAW_VERSION'
+parts = [int(p) for p in v.split('.') if p.isdigit()]
+if len(parts) >= 2 and (parts[0] == 0 and parts[1] < 2):
+    print('0.2.0')
+else:
+    print(v)
+")
           fi
 
           echo "Next version: $NEXT_VERSION"
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
           echo "bump=true" >> $GITHUB_OUTPUT
 
-          # 1. Mettre à jour CHANGELOG.md
+          # 1. Mettre à jour CHANGELOG.md avec le tag exact sans 'v'
           git cliff --tag "$NEXT_VERSION" > CHANGELOG.md
           export NEXT_VERSION
 
@@ -74,6 +84,7 @@ jobs:
 
           git add CHANGELOG.md pyproject.toml Cargo.toml
           git commit -m "chore(release): seiscode-eikonal-$NEXT_VERSION"
+          # Tag direct sans 'v'
           git tag "$NEXT_VERSION"
 
       - name: Push changes and tags
