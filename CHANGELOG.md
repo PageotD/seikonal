@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - 2026-10-16
+## [0.2.0] - 2026-10-16
 
 ### Bug Fixes
 
@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file.
 - Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
 - Remove macos support (#10)
 - Try to locate license file in sdist (#11)
+- Fix auto bump with git cliff
+- Fix auto bump with git cliff
+- Fix version control
 
 ### Documentation
 
@@ -62,4 +65,5 @@ All notable changes to this project will be documented in this file.
 ### Release
 
 - Up to 0.2.0
+- Up to 0.20 pyproject
 
