@@ -1,6 +1,29 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 ## [0.1.0] - 2026-10-16
 
-### 🚀 Features
+### Bug Fixes
+
+- Format lib.rs
+- *(ci)* Update cargo-deny config
+- Manage warning and error/vulnerabilities
+- *(ci)* Use pip install -e . for universal python dev installation
+- Fix the build wheels for windows (#9)
+
+### CI/CD
+
+- Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
+- Remove macos support (#10)
+- Try to locate license file in sdist (#11)
+
+### Documentation
+
+- Aad features to changelog
+- Update CHANGELOG
+
+### Features
 
 - Initial project structure
 - Manage errors
@@ -17,40 +40,22 @@
 - *(ray)* Implement 2D ray tracing with Runge-Kutta 2 integration and straight-line validation
 - *(python)* Expose trace_ray and trace_rays bindings with pytest suite
 
-### 🐛 Bug Fixes
+### Miscellaneous Tasks
 
-- Format lib.rs
-- *(ci)* Update cargo-deny config
-- Manage warning and error/vulnerabilities
-- *(ci)* Use pip install -e . for universal python dev installation
-- Fix the build wheels for windows (#9)
+- *(ci)* Update deny.toml to official template with allowed licenses
 
-### 📚 Documentation
-
-- Aad features to changelog
-- Update CHANGELOG
-
-### 🚜 Refactor
+### Refactor
 
 - Rename project, crates and package to seiscode-eikonal
 
-### 🎨 Styling
+### Style
 
 - Fix formatting in solver integration tests
 
-### 🧪 Testing
+### Tests
 
 - Add integration tests
 - Validate 2D FMM solver on full homogeneous grid against analytical solution
 - Add two-layer Snell refraction and head-wave validation test
 - *(python)* Add pytest suite for solve_2d wrapper and input validation
 
-### ⚙️ Miscellaneous Tasks
-
-- *(ci)* Update deny.toml to official template with allowed licenses
-- Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
-- *(release)* Seiscode-eikonal-0.1.0
-- *(release)* Seiscode-eikonal-0.1.0
-- Remove macos support (#10)
-- *(release)* Seiscode-eikonal-0.1.0
-- *(release)* Seiscode-eikonal-0.1.0
