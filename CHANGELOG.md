@@ -59,3 +59,7 @@ All notable changes to this project will be documented in this file.
 - Add two-layer Snell refraction and head-wave validation test
 - *(python)* Add pytest suite for solve_2d wrapper and input validation
 
+### Release
+
+- Up to 0.2.0
+
