@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "crates/seikonal-core",
-    "crates/seikonal-py",
+    "crates/seiscode-eikonal-core",
+    "crates/seiscode-eikonal-py",
 ]
 resolver = "2"
 
@@ -11,8 +11,5 @@ edition = "2024"
 rust-version = "1.85"
 authors = ["pageotd"]
 license = "MIT"
-repository = "https://github.com/pageotd/seikonal"
+repository = "https://github.com/pageotd/seiscode-eikonal"
 readme = "README.md"
-
-[workspace.dependencies]
-# Dépendances partagées ou futures (vide ou minimal pour le bloc 0)

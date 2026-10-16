@@ -3,7 +3,7 @@
 use numpy::{IntoPyArray, PyArray2, PyArrayMethods, PyReadonlyArray2, PyUntypedArrayMethods};
 use pyo3::exceptions::{PyIndexError, PyValueError};
 use pyo3::prelude::*;
-use seikonal_core::{FMMSolver2D, Grid2D, SeikonalError, trace_ray_2d};
+use seiscode_eikonal_core::{FMMSolver2D, Grid2D, SeikonalError, trace_ray_2d};
 
 /// Converts internal `SeikonalError` into an appropriate Python exception.
 fn to_py_err(err: SeikonalError) -> PyErr {
@@ -228,9 +228,9 @@ fn trace_rays<'py>(
     Ok(ray_list)
 }
 
-/// The `seikonal` Python module.
+/// The `seiscode_eikonal` Python module.
 #[pymodule]
-fn seikonal(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn seiscode_eikonal(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(solve_2d, m)?)?;
     m.add_function(wrap_pyfunction!(trace_ray, m)?)?;
     m.add_function(wrap_pyfunction!(trace_rays, m)?)?;

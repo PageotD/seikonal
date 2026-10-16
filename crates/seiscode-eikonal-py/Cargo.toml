@@ -1,16 +1,16 @@
 [package]
-name = "seikonal-py"
+name = "seiscode-eikonal-py"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-description = "Python bindings for seikonal"
+description = "Python bindings for seiscode-eikonal"
 
 [lib]
-name = "seikonal"
+name = "seiscode_eikonal"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-seikonal-core = { path = "../seikonal-core" }
+seiscode-eikonal-core = { path = "../seiscode-eikonal-core" }
 pyo3 = { version = "0.24", features = ["extension-module"] }
 numpy = "0.24"

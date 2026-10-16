@@ -1,9 +1,9 @@
 //! Integration tests for `seikonal-core`.
 //! Integration tests for `seikonal-core` - Block 1 (Grid & Stencil in homogeneous medium).
 
-use seikonal_core::FMMSolver2D;
-use seikonal_core::SeikonalError;
-use seikonal_core::{Grid2D, solve_eikonal_2d}; //, Grid2D, SeikonalError};
+use seiscode_eikonal_core::FMMSolver2D;
+use seiscode_eikonal_core::SeikonalError;
+use seiscode_eikonal_core::{Grid2D, solve_eikonal_2d}; //, Grid2D, SeikonalError};
 
 #[test]
 fn test_integration_error_handling() {
@@ -231,7 +231,7 @@ fn test_ray_tracing_homogeneous_straight_line() {
 
     // Receiver at (400 m, 300 m)
     let (xr, zr) = (400.0, 300.0);
-    let ray = seikonal_core::trace_ray_2d(&grid, xs, zs, xr, zr, None, None).unwrap();
+    let ray = seiscode_eikonal_core::trace_ray_2d(&grid, xs, zs, xr, zr, None, None).unwrap();
 
     let theoretical_dist = ((xr - xs).powi(2) + (zr - zs).powi(2)).sqrt(); // sqrt(300^2 + 200^2) ≈ 360.55 m
 

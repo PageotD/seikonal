@@ -2,8 +2,7 @@
 
 import numpy as np
 import pytest
-import seikonal
-
+import seiscode_eikonal as seikonal
 
 def test_solve_2d_homogeneous_analytical():
     """Verify that Python wrapper computes accurate traveltimes matching the analytical solution."""
