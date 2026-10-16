@@ -50,3 +50,5 @@
 - *(ci)* Update deny.toml to official template with allowed licenses
 - Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
 - *(release)* Seiscode-eikonal-0.1.0
+- *(release)* Seiscode-eikonal-0.1.0
+- Remove macos support (#10)
