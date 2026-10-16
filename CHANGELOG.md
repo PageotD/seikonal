@@ -52,3 +52,4 @@
 - *(release)* Seiscode-eikonal-0.1.0
 - *(release)* Seiscode-eikonal-0.1.0
 - Remove macos support (#10)
+- *(release)* Seiscode-eikonal-0.1.0
