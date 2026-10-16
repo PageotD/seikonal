@@ -2,8 +2,7 @@
 
 import numpy as np
 import pytest
-import seikonal
-
+import seiscode_eikonal as seikonal
 
 def test_trace_ray_homogeneous_straight_line():
     """Verify that ray traced in homogeneous medium is a straight line connecting receiver to source."""
