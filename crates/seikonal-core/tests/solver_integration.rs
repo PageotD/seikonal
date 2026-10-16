@@ -216,3 +216,48 @@ fn test_order2_accuracy_improvement_over_order1() {
     // Mean error with order 2 drops below 1% (typically ~0.5%)
     assert!(mean_err2 < 0.01, "Order 2 mean error too high: {mean_err2}");
 }
+
+#[test]
+fn test_ray_tracing_homogeneous_straight_line() {
+    let nx = 51;
+    let nz = 51;
+    let dx = 10.0;
+    let dz = 10.0;
+    let v0 = 2000.0;
+    let (xs, zs) = (100.0, 100.0);
+
+    let mut grid = Grid2D::new_homogeneous(nx, nz, dx, dz, 0.0, 0.0, v0).unwrap();
+    FMMSolver2D::solve_order(&mut grid, xs, zs, 2).unwrap();
+
+    // Receiver at (400 m, 300 m)
+    let (xr, zr) = (400.0, 300.0);
+    let ray = seikonal_core::trace_ray_2d(&grid, xs, zs, xr, zr, None, None).unwrap();
+
+    let theoretical_dist = ((xr - xs).powi(2) + (zr - zs).powi(2)).sqrt(); // sqrt(300^2 + 200^2) ≈ 360.55 m
+
+    // 1. Ray starts at receiver and ends at source
+    assert_eq!(ray.points.first().unwrap(), &(xr, zr));
+    let last = ray.points.last().unwrap();
+    assert!((last.0 - xs).abs() < 1e-3);
+    assert!((last.1 - zs).abs() < 1e-3);
+
+    // 2. Length must match straight line distance within 0.5%
+    let err_length = (ray.length - theoretical_dist).abs() / theoretical_dist;
+    assert!(
+        err_length < 0.005,
+        "Ray length error too high: calculated={}, theoretical={}",
+        ray.length,
+        theoretical_dist
+    );
+
+    // 3. Every intermediate point must lie on the straight line segment between source and receiver
+    // Line equation: expected_z = zs + u * (zr - zs)
+    for &(px, pz) in &ray.points {
+        let u = (px - xs) / (xr - xs);
+        let expected_z = zs + u * (zr - zs);
+        assert!(
+            (pz - expected_z).abs() < 0.5 * dx, // within half a grid cell (5 m)
+            "Ray deviated from straight line at ({px}, {pz}), expected z={expected_z}"
+        );
+    }
+}

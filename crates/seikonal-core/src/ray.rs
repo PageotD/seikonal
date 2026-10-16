@@ -153,3 +153,108 @@ mod tests {
         assert!(interpolated_gradient(&grid, -5.0, 10.0).unwrap().is_none());
     }
 }
+
+/// A 2D seismic ray path.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Ray2D {
+    /// Trajectory coordinates `[(x0, z0), (x1, z1), ...]`, starting from receiver to source.
+    pub points: Vec<(f64, f64)>,
+    /// Total integrated arclength (distance) along the ray.
+    pub length: f64,
+}
+
+/// Traces a seismic ray from a receiver position (xr, zr) back to the source (xs, zs)
+/// using Runge-Kutta 2nd-order (Heun) gradient descent on the traveltime field.
+///
+/// # Arguments
+/// - `grid`: 2D grid containing the solved traveltimes.
+/// - `xs`: Source X coordinate.
+/// - `zs`: Source Z coordinate (depth).
+/// - `xr`: Receiver X coordinate.
+/// - `zr`: Receiver Z coordinate (depth).
+/// - `step_size`: Integration step size `ds`. If `None`, defaults to `0.5 * min(dx, dz)`.
+/// - `max_steps`: Maximum number of integration steps (default: `10 * (nx + nz)`).
+pub fn trace_ray_2d(
+    grid: &Grid2D,
+    xs: f64,
+    zs: f64,
+    xr: f64,
+    zr: f64,
+    step_size: Option<f64>,
+    max_steps: Option<usize>,
+) -> Result<Ray2D, SeikonalError> {
+    let ds = step_size.unwrap_or_else(|| 0.5 * grid.dx.min(grid.dz));
+    let max_iter = max_steps.unwrap_or_else(|| 10 * (grid.nx + grid.nz));
+
+    let mut points = Vec::with_capacity(128);
+    points.push((xr, zr));
+
+    let mut current_pos = (xr, zr);
+    let mut total_length = 0.0;
+
+    let get_direction = |pos: (f64, f64)| -> Result<Option<(f64, f64)>, SeikonalError> {
+        if let Some((gx, gz)) = interpolated_gradient(grid, pos.0, pos.1)? {
+            let norm = (gx * gx + gz * gz).sqrt();
+            if norm > 1e-12 {
+                // Descend opposite to gradient: -grad / |grad|
+                return Ok(Some((-gx / norm, -gz / norm)));
+            }
+        }
+        Ok(None)
+    };
+
+    for _ in 0..max_iter {
+        let dist_to_source =
+            ((current_pos.0 - xs).powi(2) + (current_pos.1 - zs).powi(2)).sqrt();
+
+        // If within 1 step of the source, snap directly to source and finish
+        if dist_to_source <= ds {
+            points.push((xs, zs));
+            total_length += dist_to_source;
+            break;
+        }
+
+        // RK2 (Heun): k1
+        let k1 = match get_direction(current_pos)? {
+            Some(dir) => dir,
+            None => break, // Out of bounds or flat gradient
+        };
+
+        // Predictor step
+        let pred_pos = (current_pos.0 + ds * k1.0, current_pos.1 + ds * k1.1);
+
+        // RK2 (Heun): k2
+        let k2 = match get_direction(pred_pos)? {
+            Some(dir) => dir,
+            None => k1, // Fallback to Euler if predictor left the grid
+        };
+
+        // Corrector step
+        let next_pos = (
+            current_pos.0 + 0.5 * ds * (k1.0 + k2.0),
+            current_pos.1 + 0.5 * ds * (k1.1 + k2.1),
+        );
+
+        let step_len =
+            ((next_pos.0 - current_pos.0).powi(2) + (next_pos.1 - current_pos.1).powi(2)).sqrt();
+
+        // Check if we are stalling or moving away from source
+        let next_dist_to_source =
+            ((next_pos.0 - xs).powi(2) + (next_pos.1 - zs).powi(2)).sqrt();
+        if next_dist_to_source > dist_to_source + 1e-6 {
+            // Overshot or moving away, terminate by connecting to source
+            points.push((xs, zs));
+            total_length += dist_to_source;
+            break;
+        }
+
+        current_pos = next_pos;
+        points.push(current_pos);
+        total_length += step_len;
+    }
+
+    Ok(Ray2D {
+        points,
+        length: total_length,
+    })
+}
