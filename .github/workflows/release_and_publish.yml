@@ -141,6 +141,23 @@ jobs:
           name: sdist
           path: dist
 
+      - name: Inspect source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for archive in dist/*.tar.gz; do
+            echo "=== Archive: $archive ==="
+
+            echo "--- LICENSE in archive ---"
+            tar -tzf "$archive" | grep -E '(^|/)LICENSE$'
+
+            echo "--- License metadata ---"
+            pkg_info=$(tar -tzf "$archive" | grep '/PKG-INFO$' | head -n 1)
+            tar -xOf "$archive" "$pkg_info" \
+              | grep -iE '^(Metadata-Version|License|License-File):'
+          done
+
   publish:
     name: Publish to PyPI & GitHub Release
     needs: [release-metadata, build-wheels, build-sdist]
