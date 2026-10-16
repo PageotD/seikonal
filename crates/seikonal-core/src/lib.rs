@@ -6,13 +6,13 @@
 pub mod error;
 pub mod grid;
 pub mod narrowband;
-pub mod solver;
 pub mod ray;
+pub mod solver;
 pub mod stencil;
 
 pub use error::SeikonalError;
 pub use grid::Grid2D;
 pub use narrowband::{NarrowBand, NodeState, OrderedNode};
+pub use ray::{Ray2D, interpolated_gradient, node_gradient, trace_ray_2d};
 pub use solver::FMMSolver2D;
-pub use ray::{interpolated_gradient, node_gradient, trace_ray_2d, Ray2D};
 pub use stencil::solve_eikonal_2d;

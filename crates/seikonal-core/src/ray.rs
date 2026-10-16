@@ -204,8 +204,7 @@ pub fn trace_ray_2d(
     };
 
     for _ in 0..max_iter {
-        let dist_to_source =
-            ((current_pos.0 - xs).powi(2) + (current_pos.1 - zs).powi(2)).sqrt();
+        let dist_to_source = ((current_pos.0 - xs).powi(2) + (current_pos.1 - zs).powi(2)).sqrt();
 
         // If within 1 step of the source, snap directly to source and finish
         if dist_to_source <= ds {
@@ -239,8 +238,7 @@ pub fn trace_ray_2d(
             ((next_pos.0 - current_pos.0).powi(2) + (next_pos.1 - current_pos.1).powi(2)).sqrt();
 
         // Check if we are stalling or moving away from source
-        let next_dist_to_source =
-            ((next_pos.0 - xs).powi(2) + (next_pos.1 - zs).powi(2)).sqrt();
+        let next_dist_to_source = ((next_pos.0 - xs).powi(2) + (next_pos.1 - zs).powi(2)).sqrt();
         if next_dist_to_source > dist_to_source + 1e-6 {
             // Overshot or moving away, terminate by connecting to source
             points.push((xs, zs));
