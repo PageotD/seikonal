@@ -44,15 +44,15 @@ jobs:
           else
             # Python semver comparison to ensure >= 0.2.0
             NEXT_VERSION=$(python3 -c "
-import sys
-v = '$RAW_VERSION'
-parts = [int(p) for p in v.split('.') if p.isdigit()]
-if len(parts) >= 2 and (parts[0] == 0 and parts[1] < 2):
-    print('0.2.0')
-else:
-    print(v)
-")
-          fi
+            import sys
+            v = '$RAW_VERSION'
+            parts = [int(p) for p in v.split('.') if p.isdigit()]
+            if len(parts) >= 2 and (parts[0] == 0 and parts[1] < 2):
+                print('0.2.0')
+            else:
+                print(v)
+            ")
+                      fi
 
           echo "Next version: $NEXT_VERSION"
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
