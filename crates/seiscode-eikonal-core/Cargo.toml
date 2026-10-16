@@ -1,0 +1,13 @@
+[package]
+name = "seiscode-eikonal-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Core Fast Marching Method eikonal solver in pure Rust"
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
