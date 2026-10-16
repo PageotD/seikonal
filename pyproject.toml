@@ -4,10 +4,11 @@ build-backend = "maturin"
 
 [project]
 name = "seiscode-eikonal"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fast Marching Method eikonal solver and ray tracer in Rust with Python bindings"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [
     { name = "D. Pageot" }
