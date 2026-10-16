@@ -1,0 +1,176 @@
+name: Release & Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release-metadata:
+    name: Calculate Version & Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      bump: ${{ steps.semver.outputs.bump }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install git-cliff
+        uses: taiki-e/install-action@git-cliff
+
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Calculate version & generate changelog
+        id: semver
+        run: |
+          NEXT_VERSION=$(git cliff --bumped-version | sed 's/^v//')
+
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "No version bump required based on recent commits."
+            echo "bump=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Next version: $NEXT_VERSION"
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "bump=true" >> $GITHUB_OUTPUT
+
+          # 1. Mettre à jour CHANGELOG.md
+          git cliff --tag "$NEXT_VERSION" > CHANGELOG.md
+          export NEXT_VERSION
+
+          # 2. Mettre à jour pyproject.toml
+          python3 -c "
+          import os, re
+          ver = os.environ['NEXT_VERSION']
+          path = 'pyproject.toml'
+          content = open(path).read()
+          new_content = re.sub(r'(?m)^version\s*=\s*\"[^\"]+\"', 'version = \"' + ver + '\"', content, count=1)
+          open(path, 'w').write(new_content)
+          "
+
+          # 3. Mettre à jour Cargo.toml racine
+          python3 -c "
+          import os, re
+          ver = os.environ['NEXT_VERSION']
+          path = 'Cargo.toml'
+          content = open(path).read()
+          new_content = re.sub(r'(?m)^version\s*=\s*\"[^\"]+\"', 'version = \"' + ver + '\"', content, count=1)
+          open(path, 'w').write(new_content)
+          "
+
+          git add CHANGELOG.md pyproject.toml Cargo.toml
+          git commit -m "chore(release): seiscode-eikonal-$NEXT_VERSION"
+          git tag "$NEXT_VERSION"
+
+      - name: Push changes and tags
+        if: steps.semver.outputs.bump == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          tags: true
+
+  build-wheels:
+    name: Build wheels on ${{ matrix.platform.os }} (${{ matrix.platform.target }})
+    needs: release-metadata
+    if: needs.release-metadata.outputs.bump == 'true'
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: macos-13, target: x86_64-apple-darwin }
+          - { os: macos-14, target: aarch64-apple-darwin }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-metadata.outputs.version }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build wheels via maturin-action
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --find-interpreter
+          sccache: 'true'
+
+      - name: Upload wheels as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.platform.os }}-${{ matrix.platform.target }}
+          path: dist
+
+  build-sdist:
+    name: Build source distribution (sdist)
+    needs: release-metadata
+    if: needs.release-metadata.outputs.bump == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-metadata.outputs.version }}
+
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+  publish:
+    name: Publish to PyPI & GitHub Release
+    needs: [release-metadata, build-wheels, build-sdist]
+    if: needs.release-metadata.outputs.bump == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write # Requis pour PyPI Trusted Publishing
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-metadata.outputs.version }}
+
+      - name: Download all wheels and sdist
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*'
+          path: dist
+          merge-multiple: true
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.release-metadata.outputs.version }}
+          name: seiscode-eikonal-${{ needs.release-metadata.outputs.version }}
+          body_path: CHANGELOG.md
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
