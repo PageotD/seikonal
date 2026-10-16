@@ -1,25 +1,50 @@
+## [0.1.0] - 2026-10-16
 
-#### `CHANGELOG.md`
-Format standard [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) :
+### 🚀 Features
 
-```markdown
-# Changelog
+- Initial project structure
+- Manage errors
+- Add grid 2D
+- Add 2D eikonal solver
+- Define NodeState and min-heap OrderedNode for narrowband
+- Implement NarrowBand container with state management and lazy deletion
+- Implement 2D Fast Marching Method solver loop
+- Implement PyO3 module and solve_2d Python wrapper
+- *(stencil)* Implement 2nd-order upwind local eikonal formulation
+- *(solver)* Integrate 2nd-order stencil support into 2D FMM solver
+- Expose configurable 2nd-order stencil to Python and validate accuracy gains
+- *(ray)* Implement node gradient and bilinear gradient interpolation
+- *(ray)* Implement 2D ray tracing with Runge-Kutta 2 integration and straight-line validation
+- *(python)* Expose trace_ray and trace_rays bindings with pytest suite
 
-All notable changes to this project will be documented in this file.
+### 🐛 Bug Fixes
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+- Format lib.rs
+- *(ci)* Update cargo-deny config
+- Manage warning and error/vulnerabilities
+- *(ci)* Use pip install -e . for universal python dev installation
 
-## [Unreleased]
+### 📚 Documentation
 
-### Added
-- 2D grid representation (`Grid2D`) with depth-positive convention and C-order indexing (Block 1).
-- 2D local upwind Eikonal stencil (`solve_eikonal_2d`) (Block 1).
-- Narrow band priority queue (`NarrowBand`) and node state tracking (`NodeState`) with lazy deletion (Block 2).
-- 2D Fast Marching Method solver (`FmmSolver2D`) with analytical source initialization and heterogeneous velocity support (Block 3).
-- Integration test suite validating homogeneous radial waves and two-layer Snell refraction / head waves (Block 3).
-- Python bindings via PyO3 and Maturin exposing `seikonal.solve_2d` with zero-copy NumPy interoperability (Block 4).
-- Pytest test suite and Python CI pipeline integration (Block 4).
-- 2nd-order upwind Eikonal stencil (`solve_eikonal_2d_order`) reducing mean traveltime error under 1% (Block 3b).
-- Configurable `order` parameter (1 or 2, default: 2) in Rust solver and Python `seikonal.solve_2d` (Block 3b).
-- 2D ray tracing by gradient descent with receiver support
+- Aad features to changelog
+- Update CHANGELOG
+
+### 🚜 Refactor
+
+- Rename project, crates and package to seiscode-eikonal
+
+### 🎨 Styling
+
+- Fix formatting in solver integration tests
+
+### 🧪 Testing
+
+- Add integration tests
+- Validate 2D FMM solver on full homogeneous grid against analytical solution
+- Add two-layer Snell refraction and head-wave validation test
+- *(python)* Add pytest suite for solve_2d wrapper and input validation
+
+### ⚙️ Miscellaneous Tasks
+
+- *(ci)* Update deny.toml to official template with allowed licenses
+- Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
