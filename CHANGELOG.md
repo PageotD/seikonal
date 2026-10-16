@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pytest test suite and Python CI pipeline integration (Block 4).
 - 2nd-order upwind Eikonal stencil (`solve_eikonal_2d_order`) reducing mean traveltime error under 1% (Block 3b).
 - Configurable `order` parameter (1 or 2, default: 2) in Rust solver and Python `seikonal.solve_2d` (Block 3b).
+- 2D ray tracing by gradient descent with receiver support
