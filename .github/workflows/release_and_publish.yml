@@ -42,17 +42,9 @@ jobs:
           if [ -z "$RAW_VERSION" ]; then
             NEXT_VERSION="0.2.0"
           else
-            # Python semver comparison to ensure >= 0.2.0
-            NEXT_VERSION=$(python3 -c "
-            import sys
-            v = '$RAW_VERSION'
-            parts = [int(p) for p in v.split('.') if p.isdigit()]
-            if len(parts) >= 2 and (parts[0] == 0 and parts[1] < 2):
-                print('0.2.0')
-            else:
-                print(v)
-            ")
-                      fi
+            # Python semver comparison to ensure >= 0.2.0 without multi-line indentation issues
+            NEXT_VERSION=$(python3 -c "import sys; v = '$RAW_VERSION'; p = [int(x) for x in v.split('.') if x.isdigit()]; print('0.2.0' if len(p) >= 2 and p[0] == 0 and p[1] < 2 else v)")
+          fi
 
           echo "Next version: $NEXT_VERSION"
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
