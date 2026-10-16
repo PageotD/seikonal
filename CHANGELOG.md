@@ -23,6 +23,7 @@
 - *(ci)* Update cargo-deny config
 - Manage warning and error/vulnerabilities
 - *(ci)* Use pip install -e . for universal python dev installation
+- Fix the build wheels for windows (#9)
 
 ### 📚 Documentation
 
@@ -48,3 +49,4 @@
 
 - *(ci)* Update deny.toml to official template with allowed licenses
 - Integrate python build and pytest tasks into Taskfile and GitHub Actions workflow
+- *(release)* Seiscode-eikonal-0.1.0
