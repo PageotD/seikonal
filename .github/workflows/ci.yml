@@ -1,31 +1,17 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-
-env:
-  CARGO_TERM_COLOR: always
+  push:
+    branches: [main]
 
 jobs:
-  ci:
-    name: Lint, Test & Audit
+  lint:
+    name: Rust & Code Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install maturin numpy pytest
+      - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -47,5 +33,45 @@ jobs:
         with:
           tool: cargo-deny,cargo-audit
 
-      - name: Run CI tasks
-        run: task ci
+      - name: Run lint and audit
+        run: |
+          task lint
+          task audit
+
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.85"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install dependencies and build extension
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run Rust tests
+        run: cargo test --workspace --tests
+
+      - name: Run Python tests with pytest
+        run: pytest python/tests/ -v
